@@ -1,0 +1,623 @@
+name: bgp
+topology:
+  nodes:
+    server1.dc1:
+      kind: linux
+      image: node-bird
+      group: dc1
+      exec:
+        # ecmp policy
+        - sysctl net.ipv4.fib_multipath_hash_policy=1
+        - sysctl net.ipv6.fib_multipath_hash_policy=1
+        # lo
+        - ip address add 10.1.255.1/32 dev lo
+        # interface towards router2.dc1
+        - ip address add 10.1.1.2/30 dev eth1
+        - ip link set eth1 up
+        # interface towards router3.dc1
+        - ip address add 10.1.2.2/30 dev eth2
+        - ip link set eth2 up
+        # local anycast addresses
+        - ip address add 111.11.1.0/24 dev lo
+        - ip address add 111.11.2.0/24 dev lo
+        # global anycast addresses
+        - ip address add 1.1.1.0/24 dev lo
+        - ip address add 2.2.2.0/24 dev lo
+        # bird
+        - service bird start
+        # nginx
+        - bash -c "hostname >/var/www/html/index.nginx-debian.html"
+        - service nginx start
+      binds:
+        - configs/dc1.server1/bird.conf:/etc/bird/bird.conf
+    server2.dc1:
+      kind: linux
+      image: node-bird
+      group: dc1
+      exec:
+        # ecmp policy
+        - sysctl net.ipv4.fib_multipath_hash_policy=1
+        - sysctl net.ipv6.fib_multipath_hash_policy=1
+        # lo
+        - ip address add 10.1.255.2/32 dev lo
+        # interface towards router2.dc1
+        - ip address add 10.1.3.2/30 dev eth1
+        - ip link set eth1 up
+        # interface towards router3.dc1
+        - ip address add 10.1.4.2/30 dev eth2
+        - ip link set eth2 up
+        # local anycast addresses
+        - ip address add 111.11.2.0/24 dev lo
+        - ip address add 111.11.3.0/24 dev lo
+        # global anycast addresses
+        - ip address add 1.1.1.0/24 dev lo
+        - ip address add 2.2.2.0/24 dev lo
+        # bird
+        - service bird start
+        # nginx
+        - bash -c "hostname >/var/www/html/index.nginx-debian.html"
+        - service nginx start
+      binds:
+        - configs/dc1.server2/bird.conf:/etc/bird/bird.conf
+    server3.dc1:
+      kind: linux
+      image: node-bird
+      group: dc1
+      exec:
+        # ecmp policy
+        - sysctl net.ipv4.fib_multipath_hash_policy=1
+        - sysctl net.ipv6.fib_multipath_hash_policy=1
+        # lo
+        - ip address add 10.1.255.3/32 dev lo
+        # interface towards router2.dc1
+        - ip address add 10.1.5.2/30 dev eth1
+        - ip link set eth1 up
+        # interface towards router3.dc1
+        - ip address add 10.1.6.2/30 dev eth2
+        - ip link set eth2 up
+        # local anycast addresses
+        - ip address add 111.11.3.0/24 dev lo
+        - ip address add 111.11.1.0/24 dev lo
+        # global anycast addresses
+        - ip address add 1.1.1.0/24 dev lo
+        - ip address add 2.2.2.0/24 dev lo
+        # bird
+        - service bird start
+        # nginx
+        - bash -c "hostname >/var/www/html/index.nginx-debian.html"
+        - service nginx start
+      binds:
+        - configs/dc1.server3/bird.conf:/etc/bird/bird.conf
+    router1.dc1:
+      kind: linux
+      image: node-frr
+      group: dc1
+      exec:
+        # forwarding
+        - sysctl net.ipv4.ip_forward=1
+        - sysctl net.ipv6.conf.all.forwarding=1
+        # ecmp policy
+        - sysctl net.ipv4.fib_multipath_hash_policy=1
+        - sysctl net.ipv6.fib_multipath_hash_policy=1
+        # lo
+        - ip address add 10.1.254.1/32 dev lo
+        # interface towards router2.dc1
+        - ip address add 10.1.8.1/30 dev eth1
+        - ip link set eth1 up
+        # interface towards router3.dc1
+        - ip address add 10.1.9.1/30 dev eth2
+        - ip link set eth2 up
+        # interface towards router1.as102
+        - ip address add 10.102.1.2/30 dev eth3
+        - ip link set eth3 up
+        # interface towards router1.as101
+        - ip address add 10.101.1.2/30 dev eth4
+        - ip link set eth4 up
+        # frr
+        - service frr start
+        # nginx
+        - bash -c "hostname >/var/www/html/index.nginx-debian.html"
+        - service nginx start
+      binds:
+        - configs/dc1.router1/frr.conf:/etc/frr/frr.conf
+    router2.dc1:
+      kind: linux
+      image: node-bird
+      group: dc1
+      exec:
+        # forwarding
+        - sysctl net.ipv4.ip_forward=1
+        - sysctl net.ipv6.conf.all.forwarding=1
+        # ecmp policy
+        - sysctl net.ipv4.fib_multipath_hash_policy=1
+        - sysctl net.ipv6.fib_multipath_hash_policy=1
+        # lo
+        - ip address add 10.1.254.2/32 dev lo
+        # interface towards server1.dc1
+        - ip address add 10.1.1.1/30 dev eth1
+        - ip link set eth1 up
+        # interface towards server2.dc1
+        - ip address add 10.1.3.1/30 dev eth2
+        - ip link set eth2 up
+        # interface towards server3.dc1
+        - ip address add 10.1.5.1/30 dev eth3
+        - ip link set eth3 up
+        # interface towards router3.dc1
+        - ip address add 10.1.7.2/30 dev eth4
+        - ip link set eth4 up
+        # interface towards router1.dc1
+        - ip address add 10.1.8.2/30 dev eth5
+        - ip link set eth5 up
+        # bird
+        - service bird start
+        # nginx
+        - bash -c "hostname >/var/www/html/index.nginx-debian.html"
+        - service nginx start
+      binds:
+        - configs/dc1.router2/bird.conf:/etc/bird/bird.conf
+    router3.dc1:
+      kind: linux
+      image: node-bird
+      group: dc1
+      exec:
+        # forwarding
+        - sysctl net.ipv4.ip_forward=1
+        - sysctl net.ipv6.conf.all.forwarding=1
+        # ecmp policy
+        - sysctl net.ipv4.fib_multipath_hash_policy=1
+        - sysctl net.ipv6.fib_multipath_hash_policy=1
+        # lo
+        - ip address add 10.1.254.3/32 dev lo
+        # interface towards server1.dc1
+        - ip address add 10.1.2.1/30 dev eth1
+        - ip link set eth1 up
+        # interface towards server2.dc1
+        - ip address add 10.1.4.1/30 dev eth2
+        - ip link set eth2 up
+        # interface towards server3.dc1
+        - ip address add 10.1.6.1/30 dev eth3
+        - ip link set eth3 up
+        # interface towards router2.dc1
+        - ip address add 10.1.7.1/30 dev eth4
+        - ip link set eth4 up
+        # interface towards router1.dc1
+        - ip address add 10.1.9.2/30 dev eth5
+        - ip link set eth5 up
+        # bird
+        - service bird start
+        # nginx
+        - bash -c "hostname >/var/www/html/index.nginx-debian.html"
+        - service nginx start
+      binds:
+        - configs/dc1.router3/bird.conf:/etc/bird/bird.conf
+    server1.dc2:
+      kind: linux
+      image: node-bird
+      group: dc2
+      exec:
+        # ecmp policy
+        - sysctl net.ipv4.fib_multipath_hash_policy=1
+        - sysctl net.ipv6.fib_multipath_hash_policy=1
+        # lo
+        - ip address add 10.2.255.1/32 dev lo
+        # interface towards router2.dc2
+        - ip address add 10.2.1.2/30 dev eth1
+        - ip link set eth1 up
+        # interface towards router3.dc2
+        - ip address add 10.2.2.2/30 dev eth2
+        - ip link set eth2 up
+        # local anycast addresses
+        - ip address add 222.22.1.0/24 dev lo
+        - ip address add 222.22.2.0/24 dev lo
+        # global anycast addresses
+        - ip address add 1.1.1.0/24 dev lo
+        - ip address add 2.2.2.0/24 dev lo
+        # bird
+        - service bird start
+        # nginx
+        - bash -c "hostname >/var/www/html/index.nginx-debian.html"
+        - service nginx start
+      binds:
+        - configs/dc2.server1/bird.conf:/etc/bird/bird.conf
+    server2.dc2:
+      kind: linux
+      image: node-bird
+      group: dc2
+      exec:
+        # ecmp policy
+        - sysctl net.ipv4.fib_multipath_hash_policy=1
+        - sysctl net.ipv6.fib_multipath_hash_policy=1
+        # lo
+        - ip address add 10.2.255.2/32 dev lo
+        # interface towards router2.dc2
+        - ip address add 10.2.3.2/30 dev eth1
+        - ip link set eth1 up
+        # interface towards router3.dc2
+        - ip address add 10.2.4.2/30 dev eth2
+        - ip link set eth2 up
+        # local anycast addresses
+        - ip address add 222.22.2.0/24 dev lo
+        - ip address add 222.22.3.0/24 dev lo
+        # global anycast addresses
+        - ip address add 1.1.1.0/24 dev lo
+        - ip address add 2.2.2.0/24 dev lo
+        # bird
+        - service bird start
+        # nginx
+        - bash -c "hostname >/var/www/html/index.nginx-debian.html"
+        - service nginx start
+      binds:
+        - configs/dc2.server2/bird.conf:/etc/bird/bird.conf
+    server3.dc2:
+      kind: linux
+      image: node-bird
+      group: dc2
+      exec:
+        # ecmp policy
+        - sysctl net.ipv4.fib_multipath_hash_policy=1
+        - sysctl net.ipv6.fib_multipath_hash_policy=1
+        # lo
+        - ip address add 10.2.255.3/32 dev lo
+        # interface towards router2.dc2
+        - ip address add 10.2.5.2/30 dev eth1
+        - ip link set eth1 up
+        # interface towards router3.dc2
+        - ip address add 10.2.6.2/30 dev eth2
+        - ip link set eth2 up
+        # local anycast addresses
+        - ip address add 222.22.3.0/24 dev lo
+        - ip address add 222.22.1.0/24 dev lo
+        # global anycast addresses
+        - ip address add 1.1.1.0/24 dev lo
+        - ip address add 2.2.2.0/24 dev lo
+        # bird
+        - service bird start
+        # nginx
+        - bash -c "hostname >/var/www/html/index.nginx-debian.html"
+        - service nginx start
+      binds:
+        - configs/dc2.server3/bird.conf:/etc/bird/bird.conf
+    router1.dc2:
+      kind: linux
+      image: node-frr
+      group: dc2
+      exec:
+        # forwarding
+        - sysctl net.ipv4.ip_forward=1
+        - sysctl net.ipv6.conf.all.forwarding=1
+        # ecmp policy
+        - sysctl net.ipv4.fib_multipath_hash_policy=1
+        - sysctl net.ipv6.fib_multipath_hash_policy=1
+        # lo
+        - ip address add 10.2.254.1/32 dev lo
+        # interface towards router2.dc2
+        - ip address add 10.2.8.1/30 dev eth1
+        - ip link set eth1 up
+        # interface towards router3.dc2
+        - ip address add 10.2.9.1/30 dev eth2
+        - ip link set eth2 up
+        # interface towards router2.as102
+        - ip address add 10.102.6.2/30 dev eth3
+        - ip link set eth3 up
+        # interface towards router1.as103
+        - ip address add 10.103.1.2/30 dev eth4
+        - ip link set eth4 up
+        # frr
+        - service frr start
+        # nginx
+        - bash -c "hostname >/var/www/html/index.nginx-debian.html"
+        - service nginx start
+      binds:
+        - configs/dc2.router1/frr.conf:/etc/frr/frr.conf
+    router2.dc2:
+      kind: linux
+      image: node-bird
+      group: dc2
+      exec:
+        # forwarding
+        - sysctl net.ipv4.ip_forward=1
+        - sysctl net.ipv6.conf.all.forwarding=1
+        # ecmp policy
+        - sysctl net.ipv4.fib_multipath_hash_policy=1
+        - sysctl net.ipv6.fib_multipath_hash_policy=1
+        # lo
+        - ip address add 10.2.254.2/32 dev lo
+        # interface towards server1.dc2
+        - ip address add 10.2.1.1/30 dev eth1
+        - ip link set eth1 up
+        # interface towards server2.dc2
+        - ip address add 10.2.3.1/30 dev eth2
+        - ip link set eth2 up
+        # interface towards server3.dc2
+        - ip address add 10.2.5.1/30 dev eth3
+        - ip link set eth3 up
+        # interface towards router3.dc2
+        - ip address add 10.2.7.2/30 dev eth4
+        - ip link set eth4 up
+        # interface towards router1.dc2
+        - ip address add 10.2.8.2/30 dev eth5
+        - ip link set eth5 up
+        # bird
+        - service bird start
+        # nginx
+        - bash -c "hostname >/var/www/html/index.nginx-debian.html"
+        - service nginx start
+      binds:
+        - configs/dc2.router2/bird.conf:/etc/bird/bird.conf
+    router3.dc2:
+      kind: linux
+      image: node-bird
+      group: dc2
+      exec:
+        # forwarding
+        - sysctl net.ipv4.ip_forward=1
+        - sysctl net.ipv6.conf.all.forwarding=1
+        # ecmp policy
+        - sysctl net.ipv4.fib_multipath_hash_policy=1
+        - sysctl net.ipv6.fib_multipath_hash_policy=1
+        # lo
+        - ip address add 10.2.254.3/32 dev lo
+        # interface towards server1.dc2
+        - ip address add 10.2.2.1/30 dev eth1
+        - ip link set eth1 up
+        # interface towards server2.dc2
+        - ip address add 10.2.4.1/30 dev eth2
+        - ip link set eth2 up
+        # interface towards server3.dc2
+        - ip address add 10.2.6.1/30 dev eth3
+        - ip link set eth3 up
+        # interface towards router2.dc2
+        - ip address add 10.2.7.1/30 dev eth4
+        - ip link set eth4 up
+        # interface towards router1.dc2
+        - ip address add 10.2.9.2/30 dev eth5
+        - ip link set eth5 up
+        # bird
+        - service bird start
+        # nginx
+        - bash -c "hostname >/var/www/html/index.nginx-debian.html"
+        - service nginx start
+      binds:
+        - configs/dc2.router3/bird.conf:/etc/bird/bird.conf
+    router1.as101:
+      kind: linux
+      image: node-frr
+      group: as101
+      exec:
+        # forwarding
+        - sysctl net.ipv4.ip_forward=1
+        - sysctl net.ipv6.conf.all.forwarding=1
+        # ecmp policy
+        - sysctl net.ipv4.fib_multipath_hash_policy=1
+        - sysctl net.ipv6.fib_multipath_hash_policy=1
+        # lo
+        - ip address add 10.101.254.1/32 dev lo
+        # interface towards router1.dc1
+        - ip address add 10.101.1.1/30 dev eth1
+        - ip link set eth1 up
+        # interface towards server1.as102
+        - ip address add 10.102.2.2/30 dev eth2
+        - ip link set eth2 up
+        # interface towards eyeball.as101
+        - ip address add 192.168.101.1/24 dev eth3
+        - ip link set eth3 up
+        # frr
+        - service frr start
+        # nginx
+        - bash -c "hostname >/var/www/html/index.nginx-debian.html"
+        - service nginx start
+      binds:
+        - configs/as101.router1/frr.conf:/etc/frr/frr.conf
+    router1.as102:
+      kind: linux
+      image: node-frr
+      group: as102
+      exec:
+        # forwarding
+        - sysctl net.ipv4.ip_forward=1
+        - sysctl net.ipv6.conf.all.forwarding=1
+        # ecmp policy
+        - sysctl net.ipv4.fib_multipath_hash_policy=1
+        - sysctl net.ipv6.fib_multipath_hash_policy=1
+        # lo
+        - ip address add 10.102.254.1/32 dev lo
+        # interface towards router2.as102
+        - ip address add 10.102.3.1/30 dev eth1
+        - ip link set eth1 up
+        # interface towards router3.as102
+        - ip address add 10.102.4.1/30 dev eth2
+        - ip link set eth2 up
+        # interface towards router1.dc1
+        - ip address add 10.102.1.1/30 dev eth3
+        - ip link set eth3 up
+        # interface towards router1.as101
+        - ip address add 10.102.2.1/30 dev eth4
+        - ip link set eth4 up
+        # frr
+        - service frr start
+        # nginx
+        - bash -c "hostname >/var/www/html/index.nginx-debian.html"
+        - service nginx start
+      binds:
+        - configs/as102.router1/frr.conf:/etc/frr/frr.conf
+    router2.as102:
+      kind: linux
+      image: node-frr
+      group: as102
+      exec:
+        # forwarding
+        - sysctl net.ipv4.ip_forward=1
+        - sysctl net.ipv6.conf.all.forwarding=1
+        # ecmp policy
+        - sysctl net.ipv4.fib_multipath_hash_policy=1
+        - sysctl net.ipv6.fib_multipath_hash_policy=1
+        # lo
+        - ip address add 10.102.254.2/32 dev lo
+        # interface towards router1.as102
+        - ip address add 10.102.3.2/30 dev eth1
+        - ip link set eth1 up
+        # interface towards router3.as102
+        - ip address add 10.102.5.1/30 dev eth2
+        - ip link set eth2 up
+        # interface towards router1.dc2
+        - ip address add 10.102.6.1/30 dev eth3
+        - ip link set eth3 up
+        # interface towards router1.as103
+        - ip address add 10.102.7.1/30 dev eth4
+        - ip link set eth4 up
+        # frr
+        - service frr start
+        # nginx
+        - bash -c "hostname >/var/www/html/index.nginx-debian.html"
+        - service nginx start
+      binds:
+        - configs/as102.router2/frr.conf:/etc/frr/frr.conf
+    router3.as102:
+      kind: linux
+      image: node-frr
+      group: as102
+      exec:
+        # forwarding
+        - sysctl net.ipv4.ip_forward=1
+        - sysctl net.ipv6.conf.all.forwarding=1
+        # ecmp policy
+        - sysctl net.ipv4.fib_multipath_hash_policy=1
+        - sysctl net.ipv6.fib_multipath_hash_policy=1
+        # lo
+        - ip address add 10.102.254.3/32 dev lo
+        # interface towards router1.as102
+        - ip address add 10.102.4.2/30 dev eth1
+        - ip link set eth1 up
+        # interface towards router2.as102
+        - ip address add 10.102.5.2/30 dev eth2
+        - ip link set eth2 up
+        # interface towards eyeball.as102
+        - ip address add 192.168.102.1/24 dev eth3
+        - ip link set eth3 up
+        # frr
+        - service frr start
+        # nginx
+        - bash -c "hostname >/var/www/html/index.nginx-debian.html"
+        - service nginx start
+      binds:
+        - configs/as102.router3/frr.conf:/etc/frr/frr.conf
+    router1.as103:
+      kind: linux
+      image: node-frr
+      group: as103
+      exec:
+        # forwarding
+        - sysctl net.ipv4.ip_forward=1
+        - sysctl net.ipv6.conf.all.forwarding=1
+        # ecmp policy
+        - sysctl net.ipv4.fib_multipath_hash_policy=1
+        - sysctl net.ipv6.fib_multipath_hash_policy=1
+        # lo
+        - ip address add 10.103.254.1/32 dev lo
+        # interface towards router1.dc2
+        - ip address add 10.103.1.1/30 dev eth1
+        - ip link set eth1 up
+        # interface towards router2.as102
+        - ip address add 10.102.7.2/30 dev eth2
+        - ip link set eth2 up
+        # interface towards eyeball.as103
+        - ip address add 192.168.103.1/24 dev eth3
+        - ip link set eth3 up
+        # frr
+        - service frr start
+        # nginx
+        - bash -c "hostname >/var/www/html/index.nginx-debian.html"
+        - service nginx start
+      binds:
+        - configs/as103.router1/frr.conf:/etc/frr/frr.conf
+    eyeball.as101:
+      kind: linux
+      image: node-base
+      group: as101
+      exec:
+        # interface towards router1.as101
+        - ip address add 192.168.101.2/24 dev eth1
+        - ip route add 10.0.0.0/8 via 192.168.101.1
+        - ip route add 172.16.0.0/12 via 192.168.101.1
+        - ip route add 192.168.0.0/16 via 192.168.101.1
+        - ip route add 111.11.0.0/16 via 192.168.101.1
+        - ip route add 222.22.0.0/16 via 192.168.101.1
+        - ip route add 1.1.1.0/24 via 192.168.101.1
+        - ip route add 2.2.2.0/24 via 192.168.101.1
+        - ip link set eth1 up
+    eyeball.as102:
+      kind: linux
+      image: node-base
+      group: as102
+      exec:
+        # interface towards router3.as102
+        - ip address add 192.168.102.2/24 dev eth1
+        - ip route add 10.0.0.0/8 via 192.168.102.1
+        - ip route add 172.16.0.0/12 via 192.168.102.1
+        - ip route add 192.168.0.0/16 via 192.168.102.1
+        - ip route add 111.11.0.0/16 via 192.168.102.1
+        - ip route add 222.22.0.0/16 via 192.168.102.1
+        - ip route add 1.1.1.0/24 via 192.168.102.1
+        - ip route add 2.2.2.0/24 via 192.168.102.1
+        - ip link set eth1 up
+    eyeball.as103:
+      kind: linux
+      image: node-base
+      group: as103
+      exec:
+        # interface towards router1.as103
+        - ip address add 192.168.103.2/24 dev eth1
+        - ip route add 10.0.0.0/8 via 192.168.103.1
+        - ip route add 172.16.0.0/12 via 192.168.103.1
+        - ip route add 192.168.0.0/16 via 192.168.103.1
+        - ip route add 111.11.0.0/16 via 192.168.103.1
+        - ip route add 222.22.0.0/16 via 192.168.103.1
+        - ip route add 1.1.1.0/24 via 192.168.103.1
+        - ip route add 2.2.2.0/24 via 192.168.103.1
+        - ip link set eth1 up
+
+  links:
+    # dc1 servers
+    - endpoints: ["server1.dc1:eth1", "router2.dc1:eth1"]
+    - endpoints: ["server1.dc1:eth2", "router3.dc1:eth1"]
+    - endpoints: ["server2.dc1:eth1", "router2.dc1:eth2"]
+    - endpoints: ["server2.dc1:eth2", "router3.dc1:eth2"]
+    - endpoints: ["server3.dc1:eth1", "router2.dc1:eth3"]
+    - endpoints: ["server3.dc1:eth2", "router3.dc1:eth3"]
+    # dc1 routers
+    - endpoints: ["router1.dc1:eth1", "router2.dc1:eth5"]
+    - endpoints: ["router1.dc1:eth2", "router3.dc1:eth5"]
+    - endpoints: ["router2.dc1:eth4", "router3.dc1:eth4"]
+    # dc2 servers
+    - endpoints: ["server1.dc2:eth1", "router2.dc2:eth1"]
+    - endpoints: ["server1.dc2:eth2", "router3.dc2:eth1"]
+    - endpoints: ["server2.dc2:eth1", "router2.dc2:eth2"]
+    - endpoints: ["server2.dc2:eth2", "router3.dc2:eth2"]
+    - endpoints: ["server3.dc2:eth1", "router2.dc2:eth3"]
+    - endpoints: ["server3.dc2:eth2", "router3.dc2:eth3"]
+    # dc2 routers
+    - endpoints: ["router1.dc2:eth1", "router2.dc2:eth5"]
+    - endpoints: ["router1.dc2:eth2", "router3.dc2:eth5"]
+    - endpoints: ["router2.dc2:eth4", "router3.dc2:eth4"]
+    # as101 <-> dc1
+    - endpoints: ["router1.as101:eth1", "router1.dc1:eth4"]
+    # as102 <-> dc1
+    - endpoints: ["router1.as102:eth3", "router1.dc1:eth3"]
+    # as102 <-> dc2
+    - endpoints: ["router2.as102:eth3", "router1.dc2:eth3"]
+    # as102 <-> as101
+    - endpoints: ["router1.as102:eth4", "router1.as101:eth2"]
+    # as102 <-> as103
+    - endpoints: ["router2.as102:eth4", "router1.as103:eth2"]
+    # as102 routers
+    - endpoints: ["router1.as102:eth1", "router2.as102:eth1"]
+    - endpoints: ["router1.as102:eth2", "router3.as102:eth1"]
+    - endpoints: ["router2.as102:eth2", "router3.as102:eth2"]
+    # as103 <-> dc2
+    - endpoints: ["router1.as103:eth1", "router1.dc2:eth4"]
+    # as101 eyeballs
+    - endpoints: ["router1.as101:eth3", "eyeball.as101:eth1"]
+    # as102 eyeballs
+    - endpoints: ["router3.as102:eth3", "eyeball.as102:eth1"]
+    # as103 eyeballs
+    - endpoints: ["router1.as103:eth3", "eyeball.as103:eth1"]
