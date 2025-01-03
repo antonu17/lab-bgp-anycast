@@ -13,7 +13,7 @@ brew install lima docker
 #### Step 2. Create VM with docker server and activate docker context
 
 ```
-limactl create --name=default --vm-type=qemu --cpus=4 --memory=8 --disk 80 --mount-writable --mount-inotify template://docker-rootful
+limactl create --name=default --vm-type=qemu --cpus=4 --memory=8 --disk 80 --mount-type=reverse-sshfs --mount-writable template://docker-rootful
 limactl start default
 docker context create lima-default --docker "host=unix://$HOME/.lima/default/sock/docker.sock"
 docker context use lima-default

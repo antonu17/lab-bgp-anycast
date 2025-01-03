@@ -139,7 +139,7 @@ The tasks can be completed in any order.
 
 ### Task 1
 
-Peering partners have reported concerns about excessive prefix announcements. Ensure no prefixes longer than `/24` are advertised from both Data Centers. Maintain uninterrupted connectivity during this process. You may only modify the configuration of `router1.dc1` and `router1.dc2`.
+Peering partners have reported concerns about excessive prefix announcements. Ensure no prefixes longer than `/24` for IPv4 and `/48` for IPv6 are advertised from both Data Centers. Maintain uninterrupted connectivity during this process. You may only modify the configuration of `router1.dc1` and `router1.dc2`.
 
 ### Task 2
 
