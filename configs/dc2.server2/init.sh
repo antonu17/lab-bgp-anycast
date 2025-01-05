@@ -22,7 +22,9 @@ ip -6 address add fc00:22:3::/64 dev lo
 # global anycast addresses
 ip -4 address add 1.1.1.0/24 dev lo
 ip -4 address add 2.2.2.0/24 dev lo
-ip -6 address add fc00:aa::/48 dev lo
+ip -6 address add fc00:aa::/46 dev lo
+iptables -A INPUT -p tcp --dport 179 -j DROP
+iptables -A OUTPUT -p tcp --dport 179 -j DROP
 # bird
 service bird start
 # nginx

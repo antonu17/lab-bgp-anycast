@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # forwarding
-sysctl net.ipv4.ip_forward=1
+sysctl net.ipv4.ip_forward=0
 sysctl net.ipv6.conf.all.forwarding=1
 # ecmp policy
 sysctl net.ipv4.fib_multipath_hash_policy=1

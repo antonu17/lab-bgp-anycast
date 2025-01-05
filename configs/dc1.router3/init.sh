@@ -4,7 +4,7 @@
 sysctl net.ipv4.ip_forward=1
 sysctl net.ipv6.conf.all.forwarding=1
 # ecmp policy
-sysctl net.ipv4.fib_multipath_hash_policy=1
+sysctl net.ipv4.fib_multipath_hash_policy=0
 sysctl net.ipv6.fib_multipath_hash_policy=1
 # lo
 ip -4 address add 10.1.254.3/32 dev lo
