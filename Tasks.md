@@ -23,6 +23,14 @@
     - [Task 6](#task-6)
     - [Task 7](#task-7)
   - [Troubleshooting Tasks](#troubleshooting-tasks)
+    - [Task 1](#task-1-1)
+    - [Task 2](#task-2-1)
+    - [Task 3](#task-3-1)
+    - [Task 4](#task-4-1)
+    - [Task 5](#task-5-1)
+    - [Task 6](#task-6-1)
+    - [Task 7](#task-7-1)
+    - [Task 8](#task-8)
 
 ## Task solving tips
 
@@ -55,7 +63,7 @@ The main branch has a fully operational topology: all servers and routers can pi
 
 ### Avoid easy ways
 
-Use your Linux CLI knowledge. Avoid looking into `bgp.clab.yaml` or routers configuration files unless instructed by the task. Instead, leverage your expertise with tools and router's cli shells: ex. `ip`, `ss`, `ping`, `traceroute`, `iptables`, `sysctl`, `birdc`, `vtysh`, etc.
+Use your Linux CLI knowledge. Avoid looking into `bgp.clab.yaml` or routers configuration files unless instructed by the task. Instead, leverage your expertise with tools and router's CLI shells: e.g. `ip`, `ss`, `ping`, `traceroute`, `iptables`, `sysctl`, `birdc`, `vtysh`, etc.
 
 It might be tempting to examine the configuration files to uncover the details, but doing so won't enhance your learning experience. Especially for troubleshooting, identifying the issue in advance takes away the challenge and satisfaction of diagnosing it independently.
 
@@ -71,7 +79,7 @@ lima ./launch.sh --rebuild
 
 ### Topology diagram is your best friend
 
-Keep referring to the [Topology Diagram](./Tolopogy.md) whenever you are configuring or troubleshooting anything.
+Keep referring to the [Topology Diagram](/Topology.md) whenever you are configuring or troubleshooting anything.
 
 ![Details](https://raw.githubusercontent.com/antonu17/lab-bgp-anycast/refs/heads/main/diagram-details.drawio.svg)
 
@@ -98,7 +106,7 @@ Some resources for starters:
 - [FRR user guide](https://docs.frrouting.org/en/stable-10.2/)
 - [Linux Advanced Routing & Traffic Control HOWTO](https://lartc.org/howto/) (aka LARTC HOWTO)
 
-See [Cheatsheet](./Cheatsheet.md) page for most important linux / routers cli commands.
+See [Cheatsheet](./Cheatsheet.md) page for most important linux / routers CLI commands.
 
 ### Have fun!
 
@@ -167,4 +175,44 @@ You are part of network traffic engineer team for Data Center #1. The planning t
 
 ## Troubleshooting Tasks
 
-TBD
+**You need to switch to `tshoot` branch**:
+
+```
+sudo containerlab destroy
+git checkout tshoot
+sudo containerlab deploy
+```
+
+After this, **DO NOT** look into `bgp.clab.yaml` and Bird or FRR configuration files, you will spoil all fun. Several configuration problems were deliberately introduced in `tshoot` branch. After you figure out the issue, fix it using CLI commands or by updating configuration files. Do not just compare configurations to spot problems. Use FRR/Bird and Linux CLI commands as much as possible. Issues are not necessarily in Bird or FRR configuration. Order of tasks is not important. Have fun troubleshooting!
+
+### Task 1
+
+Identify and fix the issue stopping `server1.dc2` from processing anycast requests
+
+### Task 2
+
+Customers in AS 102 are having trouble accessing the web service at IPv4 address `1.1.1.1`, while the service works perfectly over IPv6 at `fc00:aa::`. Investigate the cause of the issue with IPv4 connectivity, identify the problem, and implement a fix. Use `ping` from `eyeball.as102` to confirm your solution.
+
+### Task 3
+
+HTTP requests from `server3.dc1` to the DC-level anycast address `111.11.2.2` are consistently routed to the same server, causing overload. Investigate the cause of this behavior and resolve the issue.
+
+### Task 4
+
+Identify and resolve the issue preventing `server2.dc2` from handling any anycast requests.
+
+### Task 5
+
+`server2.dc2` is not receiving any anycast traffic for IPv6 address `fc00:aa::`. Investigate the cause and fix the issue to restore proper traffic flow.
+
+### Task 6
+
+`server3.dc2` cannot access the DC-level anycast service at `fc00:22:2::`. Identify the cause of the problem and implement a solution to restore connectivity.
+
+### Task 7
+
+Customer requests from AS 101 to the anycast address `2.2.2.2` are always routed to Data Center #2 through AS 102, even when Data Center #1 is closer. Investigate the routing behavior and implement a solution to ensure traffic is directed to the nearest data center.
+
+### Task 8
+
+Customer requests from AS 103 to the anycast address `1.1.1.1` are consistently routed to Data Center #1 via AS 102, despite the proximity of Data Center #2. Investigate the routing behavior and implement a solution to ensure traffic is directed to the nearest data center.
